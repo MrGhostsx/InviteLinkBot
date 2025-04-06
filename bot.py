@@ -1,34 +1,31 @@
-import os
-import json
 import logging
-from dotenv import load_dotenv
 from telegram.ext import ApplicationBuilder
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-# Load .env variables
-load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID"))
-TARGET_CHANNEL_ID = int(os.getenv("TARGET_CHANNEL_ID"))  # e.g. -1001234567890
-MESSAGE_ID = int(os.getenv("MESSAGE_ID"))  # Message ID to edit
+# === Configuration (direct values instead of .env or JSON) ===
+BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"  # 🔁 Replace with your bot token
+ADMIN_ID = 123456789  # 🔁 Replace with your Telegram user ID
+TARGET_CHANNEL_ID = -1001234567890  # 🔁 Replace with your channel ID
+MESSAGE_ID = 111  # 🔁 Replace with the pinned message ID
 
-# Logging
+# Replace with your actual channel/group IDs
+CHANNELS = [
+    "-100xxxxxxxxxx",
+    "-100yyyyyyyyyy"
+]
+
+# Emojis for each channel
+EMOJIS = ["👿", "♥️", "👻", "⚡", "🤡", "🍫", "🎯", "🌟", "💥", "🔥"]
+
+# === Logging ===
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
 
-# Load channels list
-with open("channels.json", "r") as file:
-    CHANNELS = json.load(file)
-
-# Unique emojis for each channel
-EMOJIS = ["👿", "♥️", "👻", "⚡", "🤡", "🍫", "🎯", "🌟", "💥", "🔥"]
-
-# Store last invite links
 last_links = {}
 
-# Function to generate new links
+# === Function to Generate Invite Links ===
 async def generate_links(app):
     bot = app.bot
     global last_links
@@ -54,10 +51,10 @@ async def generate_links(app):
             chat_info = await bot.get_chat(channel)
             title = chat_info.title or "Unnamed"
 
-            # Add to update text with HTML formatting — emoji after name
+            # Add to updated text
             updated_text += f'▸ <a href="{invite.invite_link}"><i>{title}</i></a> {emoji}\n'
 
-            # Notify admin
+            # Send info to admin
             await bot.send_message(
                 chat_id=ADMIN_ID,
                 text=f"""✅ <b>New Invite Link Generated!</b>
@@ -81,7 +78,7 @@ async def generate_links(app):
                 parse_mode="HTML"
             )
 
-    # Update pinned channel message
+    # Update pinned message
     try:
         await bot.edit_message_text(
             chat_id=TARGET_CHANNEL_ID,
@@ -90,7 +87,7 @@ async def generate_links(app):
             parse_mode="HTML",
             disable_web_page_preview=True
         )
-        logging.info("✅ Channel message updated with new invite links.")
+        logging.info("✅ Channel message updated.")
     except Exception as e:
         logging.error(f"❌ Failed to update channel message: {e}")
         await bot.send_message(
@@ -99,13 +96,12 @@ async def generate_links(app):
             parse_mode="HTML"
         )
 
-# Bot main function
+# === Main Function ===
 async def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # Start scheduler
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(generate_links, "interval", minutes=1, args=[app])  # 10 minutes interval
+    scheduler.add_job(generate_links, "interval", minutes=10, args=[app])
     scheduler.start()
 
     await app.bot.send_message(
@@ -115,8 +111,7 @@ async def main():
 🔁 Invite links will be refreshed every <b>10 minutes</b>
 📩 You will get updated links here automatically.
 
-🔒 <i>Sit back and relax!</i>
-""",
+🔒 <i>Sit back and relax!</i>""",
         parse_mode="HTML"
     )
 
@@ -126,7 +121,7 @@ async def main():
     await app.updater.start_polling()
     await app.updater.idle()
 
-# Run
+# === Run ===
 if __name__ == "__main__":
     import asyncio
     asyncio.run(main())
