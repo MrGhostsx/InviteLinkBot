@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 # === Load variables from Koyeb ENV ===
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = os.getenv("ADMIN_ID", "").split()
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 TARGET_CHANNEL_ID = int(os.getenv("TARGET_CHANNEL_ID"))  # e.g. -1001234567890
 MESSAGE_ID = int(os.getenv("MESSAGE_ID"))  # Pinned message ID
 CHANNELS = os.getenv("CHANNELS", "").split()  # space-separated list of channel IDs
