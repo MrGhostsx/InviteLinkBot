@@ -92,14 +92,14 @@ async def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(generate_links, "interval", seconds=10, args=[app])
+    scheduler.add_job(generate_links, "interval", seconds=60, args=[app])
     scheduler.start()
 
     await app.bot.send_message(
         chat_id=ADMIN_ID,
         text="""✅ <b>InviteLinkBot™ is now active!</b>
 
-🔁 Invite links will be refreshed every <b>10 Seconds</b>
+🔁 Invite links will be refreshed every <b>1 Minutes</b>
 📩 You will get updated links here automatically.
 
 🔒 <i>Sit back and relax!</i>
